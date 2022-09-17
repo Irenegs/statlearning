@@ -1,0 +1,398 @@
+---
+title: "Boston"
+output: html_notebook
+---
+
+**Índice**   
+1. [Chapter 2 - Exercise 10](#id1)  
+2. [Chapter 3 - Exercise 15](#id2)  
+3. [Chapter 4 - Exercise 16](#id3)  
+3. [Chapter 5 - Exercise 9](#id4)
+
+<h1>Chapter 2 - Exercise 10</h1><a name='id1'></a>
+
+This exercise involves the Boston housing data set.
+
+(a) To begin, load in the Boston data set. The Boston data set is part of the ISLR2 library.
+
+```{r}
+library ( ISLR2 )
+```
+
+Now the data set is contained in the object Boston .
+
+```{r}
+Boston
+attach(Boston)
+```
+
+Read about the data set:
+
+```{r}
+#? Boston
+```
+
+How many rows are in this data set? How many columns? What do the rows and columns represent?
+
+<span style="color:blue">
+A data set containing housing values in 506 suburbs of Boston. A data frame with 506 rows and 13 variables.</span>
+
+<span style="color:blue">
++ crim: per capita crime rate by town.  
++ zn: proportion of residential land zoned for lots over 25,000 sq.ft.  
++ indus: proportion of non-retail business acres per town.  
++ chas: Charles River dummy variable (= 1 if tract bounds river; 0 otherwise).  
++ nox: nitrogen oxides concentration (parts per 10 million).  
++ rm: average number of rooms per dwelling.  
++ age: proportion of owner-occupied units built prior to 1940.  
++ dis: weighted mean of distances to five Boston employment centres.  
++ rad: index of accessibility to radial highways.  
++ tax: full-value property-tax rate per $10,000.  
++ ptratio: pupil-teacher ratio by town.  
++ lstat: lower status of the population (percent).  
++ medv: median value of owner-occupied homes in $1000s.</span>
+
+
+(b) Make some pairwise scatterplots of the predictors (columns) in this data set. Describe your findings.
+
+```{r}
+pairs(Boston)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(chas, crim)
+plot(rad, age)
+plot(rad, crim)
+plot(dis,nox)
+```
+<span style="color:blue">Suburbs with higher accesibility to radial highways (rad) have elder houses (age).There are no suburbs that bound the river with high crim rate. There are no suburbs far from radial highways with high crim rate. Dis and nox have a negative relationship.</span>
+
+
+(c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.
+
+<span style="color:blue">chas (-), age(+), dis(-), rad(+), tax(+), zn(-)</span>
+
+(d) Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.
+
+
+```{r}
+par(mfrow = c(2,2))
+varlist=list(1,10,11)
+for (i in varlist){
+  print(paste(names(Boston[i]),range(Boston[i])))
+  plot(Boston[,i], ylab=names(Boston[i]))
+}
+
+```
+
+<span style="color:blue">There are a few suburbs with very high crim rate, some suburbs with very high tax rate and a lot of suburbs with a high pupil-teacher rate.</span>
+
+(e) How many of the census tracts in this data set bound the Charles river?
+
+```{r}
+Ch=as.factor(chas)
+summary(Ch)
+```
+
+<span style="color:blue">35 suburbs bound the Charles River.</span>
+
+
+(f) What is the median pupil-teacher ratio among the towns in this data set?
+
+```{r}
+median(ptratio)
+```
+
+
+(g) Which census tract of Boston has lowest median value of owner-occupied homes? What are the values of the other predictors for that census tract, and how do those values compare to the overall ranges for those predictors? Comment on your findings.
+
+```{r}
+summary(Boston)
+```
+
+
+```{r}
+
+Boston[medv==min(medv),]
+
+```
+<span style="color:blue">They have similar values: 0 for zn, high indus, med-high nox, similar rm, maximal age, low dis, max rad, high tax, high ptratio, high lstat. </span>
+<span style="color:blue">In comparison with the overall ranges: crim, indus, nox, age, rad, tax, ptratio and lstat are over 3rd Qu. Meanwhile, zn, chas, rm and dis have low values (sometimes before 1st Qu.).</span>
+
+
+(h) In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the census tracts that average more than eight rooms per dwelling.
+
+```{r}
+nrow(Boston[rm>7,])
+nrow(Boston[rm>8,])
+nrow(Boston)
+summary(rm)
+```
+<span style="color:blue">There are only 13 out of 506 suburbs with more than 8 rooms per dwelling in average. There are a few suburbs with very large houses.</span>
+
+<h1>Chapter 3 - Exercise 15</h1><a name='id2'></a>
+
+This problem involves the Boston data set, which we saw in the lab for this chapter. We will now try to predict per capita crime rate using the other variables in this data set. In other words, per capita crime rate is the response, and the other variables are the predictors.
+(a) For each predictor, fit a simple linear regression model to predict the response. Describe your results. In which of the models is there a statistically significant association between the predictor and the response? Create some plots to back up your assertions.
+
+```{r}
+for (i in 2:13){
+  print(names(Boston[i]))
+  LM=lm(crim~Boston[,i])
+  print(summary(LM))
+}
+  
+```
+<span style="color:blue">Best models are: indus, nox, age, dis, rad, tax, lsat and medv.</span>
+
+```{r}
+varlist=list(indus, nox, age, dis, rad, tax, lstat, medv)
+
+par(mfrow = c(2,4))
+for (i in varlist){
+  plot(i,crim)
+}
+
+```
+
+
+(b) Fit a multiple regression model to predict the response using all of the predictors. Describe your results. For which predictors can we reject the null hypothesis H 0 : β j = 0?
+
+```{r}
+A=lm(crim~zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+lstat+medv)
+summary(A)
+```
+<span style="color:red">Less significant values in the total model are indus, chas, rm, age, tax and ptratio.</span>
+
+(c) How do your results from (a) compare to your results from (b)? Create a plot displaying the univariate regression coefficients from (a) on the x-axis, and the multiple regression coefficients from (b) on the y-axis. That is, each predictor is displayed as a single point in the plot. Its coefficient in a simple linear regression model is shown on the x-axis, and its coefficient estimate in the multiple linear regression model is shown on the y-axis.
+
+<span style="color:blue">With all predictors, the important ones are rad, dis and medv, with where some of the previously mentioned.</span>
+
+```{r}
+SLRCoef=c()
+for (i in 2:13){
+  LM=lm(crim~Boston[,i])
+  SLRCoef=c(SLRCoef,summary(LM)$coefficients[-1,1])
+}
+plot(SLRCoef,summary(A)$coefficients[-1,1])
+```
+
+
+<span style="color:blue">nox is the one.</span>
+
+(d) Is there evidence of non-linear association between any of the predictors and the response? To answer this question, for each predictor X, fit a model of the form
+Y = β_0 + β_1 X + β_2 X^2 + β_3 X^3 + e.
+
+```{r}
+for (i in (2:13)){
+  print(names(Boston[i]))
+  B <- lm(crim~Boston[,i]+I(Boston[,i]^2)+I(Boston[,i]^3))
+  print(summary(B))
+}
+```
+<span style="color:blue">It seems there is a nonlinear relationship with indus, nox and dis.</span>
+
+<h1>Chapter 4 - Exercise 16</h1><a name='id3'></a>
+
+
+Using the Boston data set, fit classification models in order to predict whether a given census tract has a crime rate above or below the median. Explore logistic regression, LDA, naive Bayes, and KNN models using various subsets of the predictors. Describe your findings.
+Hint: You will have to create the response variable yourself, using the variables that are contained in the Boston data set.
+
+```{r}
+#mass library
+library(MASS)
+```
+
+
+```{r}
+#Create variable and data frame
+M=median(crim)
+crim01 <- rep(1, length(crim))
+crim01[crim<median(crim)]=0
+Boston2 <- data.frame(Boston, crim01)
+
+#Spliting training data
+#take a sample
+x<-sample(c(1:length(crim)), round(0.7*length(crim)))
+
+train <- Boston2[x,]
+
+Boston2.test <- Boston2[-x,]
+crim01.test <- crim01[-x]
+```
+<span style="color:blue">Boxplot to find out relationships between variables. Findings: predictors are zn, rm and dis.</span>
+
+
+```{r}
+par (mfrow = c(3, 4))
+for (i in 2:13){
+  plot(as.factor(crim01),Boston2[,i],ylab=names(Boston2[i]),xlab="crim01")
+}
+```
+
+
+
+
+<span style="color:blue">
+Logistic Regression
+</span>
+
+```{r}
+LR=glm(crim01~zn+rm+dis, data=Boston2, family=binomial, subset=x)
+summary(LR)
+LR.Prob=predict(LR,Boston2.test, type='response')
+LR.pred =rep (0, length(crim01.test))
+LR.pred[LR.Prob>.5] = 1
+table(LR.pred, crim01.test)
+mean(LR.pred != crim01.test)
+
+```
+
+
+<span style="color:blue">
+LDA
+</span>
+
+
+```{r}
+lda.fit=lda(crim01 ~ zn+rm+dis, data=Boston2, subset=x)#subset must be a vector, train is a df
+lda.pred <- predict(lda.fit, Boston2.test)
+lda.class <- lda.pred$class
+
+table(lda.class, crim01.test)
+mean(lda.class!=crim01.test)
+```
+
+
+<span style="color:blue">
+QDA
+</span>
+
+```{r}
+qda.fit=qda(crim01~zn+rm+dis, data=Boston2, subset=x)
+qda.pred <- predict(qda.fit, Boston2.test)
+qda.class <- qda.pred$class
+
+table(qda.class, crim01.test)
+mean(qda.class!=crim01.test)
+```
+
+
+<span style="color:blue">
+Naive Bayes
+</span>
+
+
+```{r}
+library(e1071)
+NB=naiveBayes(crim01~rm+zn+dis, data=Boston2, subset=x)
+NB.pred=predict(NB, Boston2.test)
+table(NB.pred, crim01.test)
+mean(NB.pred!=crim01.test)
+```
+
+
+<span style="color:blue">
+KNN
+</span>
+
+
+```{r}
+library(class)
+train.X <- cbind (rm,dis,zn) [x,]
+test.X <- cbind (rm,dis,zn) [-x,]
+train.crim01 <- crim01[x]
+set.seed (1)
+for (i in 1:100){
+  KNN.pred=knn(train.X, test.X, train.crim01, k=i)
+  table(KNN.pred, crim01.test)
+  if (mean(KNN.pred != crim01.test) <= 0.19){
+    print(i)
+    print(mean(KNN.pred != crim01.test))
+  }
+}
+```
+
+<span style="color:blue">First of all, we take the sample with 70% of the data. Secondly, we plot the variables against the response to decide which variables we are going to use. Finally, we fit and predict with several models and compare the error rate. The lowest error rate is achieved with KNN and K=28, 31 or 32. QDA also has lower error rate than the other methods.</span>
+
+<h1>Chapter 5 - Exercise 9</h1><a name="id4"></a>
+
+We will now consider the Boston housing data set, from the ISLR2 library.
+(a) Based on this data set, provide an estimate for the population mean of medv . Call this estimate ^μ.
+
+```{r}
+set.seed(1)
+mu=mean(Boston$medv)
+mu
+```
+
+
+(b) Provide an estimate of the standard error of μ̂. Interpret this result.
+Hint: We can compute the standard error of the sample mean by dividing the sample standard deviation by the square root of the number of observations.
+
+```{r}
+sterr=sd(Boston$medv)/sqrt(length(Boston[,1]))
+sterr
+```
+
+
+(c) Now estimate the standard error of ^μ using the bootstrap. How does this compare to your answer from (b)?
+
+```{r}
+library(boot)
+```
+
+```{r}
+set.seed(1)
+mean.medv <-function(data=Boston, index){mean(Boston$medv[index])}
+
+Bmu=boot(data=Boston, statistic=mean.medv, R=1000)
+Bmu
+```
+<span style="color:blue">The std error given by the bootstrap is a bit higher than the estimation in (b).
+
+(d) Based on your bootstrap estimate from (c), provide a 95 % confidence interval for the mean of medv . Compare it to the results obtained using t.test(Boston$medv) . Hint: You can approximate a 95 % confidence interval using the formula [μ̂ − 2SE(μ̂), μ̂ + 2SE(μ̂)].
+
+```{r}
+IC=c(mu-2*sd(Bmu$t),mu+2*sd(Bmu$t))
+IC
+```
+```{r}
+t.test(Boston$medv)
+```
+The confidence interval given by the bootstrap is wider than the given by t.test(Boston$medv) because the std error is higher in bootstrap (See (c)).
+
+(e) Based on this data set, provide an estimate, μ̂ med , for the median value of medv in the population.
+
+```{r}
+set.seed(1)
+median.fn <- function(data,index){return(median(data[index]))}
+
+boot(Boston$medv, median.fn, 1000)
+```
+(f) We now would like to estimate the standard error of μ̂ med . Unfortunately, there is no simple formula for computing the standard error of the median. Instead, estimate the standard error of the median using the bootstrap. Comment on your findings.
+
+The standard error for the median is 
+
+```{r}
+sd(Bmed$t)
+```
+
+(g) Based on this data set, provide an estimate for the tenth percentile of medv in Boston census tracts. Call this quantity μ̂ 0.1.(You can use the quantile() function.)
+
+```{r}
+mu0.1=quantile(Boston$medv, 0.1)
+mu0.1
+```
+
+
+(h) Use the bootstrap to estimate the standard error of μ̂ 0.1 . Comment on your findings.
+
+```{r}
+set.seed(1)
+q.fn<-function(data=Boston, index){quantile(Boston$medv[index], 0.1)}
+Bq=boot(data=Boston, statistic=q.fn, R=1000)
+Bq
+```
+

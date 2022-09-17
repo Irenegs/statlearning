@@ -1,0 +1,270 @@
+---
+title: "Weekly"
+output: html_notebook
+---
+```{r}
+library(ISLR2)
+attach(Weekly)
+```
+
+**Índice**   
+1. [Chapter 4 - Exercise 13](#id1)  
+2. [Chapter 5 - Exercise 7](#id2)  
+
+<h1>Chapter 4 - Exercise 13</h1><a name='id1'></a>
+
+
+This question should be answered using the Weekly data set, which is part of the ISLR2 package. This data is similar in nature to the Smarket data from this chapter’s lab, except that it contains 1, 089 weekly returns for 21 years, from the beginning of 1990 to the end of 2010.
+(a) Produce some numerical and graphical summaries of the Weekly data. Do there appear to be any patterns?
+
+```{r}
+summary(Weekly)
+```
+
+```{r}
+pairs(Weekly)
+```
+
+(b) Use the full data set to perform a logistic regression with Direction as the response and the five lag variables plus Volume as predictors. Use the summary function to print the results. Do any of the predictors appear to be statistically significant? If so, which ones?
+
+```{r}
+A=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=Weekly, family=binomial)
+summary(A)
+```
+<span style="color:blue">
+It appears only Lag2 to be statistically significant.
+</span>
+
+(c) Compute the confusion matrix and overall fraction of correct predictions. Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression.
+
+
+```{r}
+A.Prob=predict(A,type='response')
+contrasts(Direction)
+```
+
+```{r}
+A.pred =rep (" Down ", 1089)
+A.pred[A.Prob>.5] = "Up"
+table(A.pred, Direction)
+mean(A.pred!=Direction)
+```
+
+<span style="color:blue">
+Predicted "Down" of all "Down"=54/484=0.1115702
+Predicted "Up" of all "Up"=557/605=0.9206612
+True "Down" of all predicted as "Down" =54/102=0.5294118
+True "Up" of all predicted as "Up" = 557/987=0.5643364
+Error rate = 0.4885216
+</span>
+
+
+(d) Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions
+for the held out data (that is, the data from 2009 and 2010).
+
+```{r}
+#Separation of training and test data
+train <- (Year < 2009)
+Weekly.Test=Weekly[!train,]
+Direction.Test=Direction[!train]
+```
+
+```{r}
+#Fitting of the model
+B=glm(Direction~Lag2, data=Weekly, family=binomial, subset=train)
+summary(B)
+```
+```{r}
+#Prediction and confusion matrix
+B.Prob=predict(B, Weekly.Test, type='response')
+B.pred =rep ("Down", length(Direction.Test))
+B.pred[B.Prob>.5] = "Up"
+table(B.pred, Direction.Test)
+mean(B.pred!=Direction.Test)
+```
+(e) Repeat (d) using LDA.
+```{r}
+library(MASS)
+```
+
+```{r}
+#Fitting of the LDA model
+LDA=lda(Direction~Lag2, data=Weekly, subset=train)
+```
+```{r}
+plot(LDA)
+```
+
+```{r}
+#Prediction and confusion matrix
+LDA.pred=predict(LDA, Weekly.Test)
+names(LDA.pred)
+LDA.Direction=LDA.pred$class
+table(LDA.Direction, Direction.Test)
+mean(LDA.Direction!=Direction.Test)
+```
+
+(f) Repeat (d) using QDA.
+
+```{r}
+#Fitting of the QDA model
+QDA=qda(Direction~Lag2, data=Weekly, subset=train)
+```
+```{r}
+#Prediction and confusion matrix
+QDA.pred=predict(QDA, Weekly.Test)
+names(QDA.pred)
+QDA.Direction=QDA.pred$class
+table(QDA.Direction, Direction.Test)
+mean(QDA.Direction!=Direction.Test)
+```
+
+(g) Repeat (d) using KNN with K = 1.
+```{r}
+library(class)
+```
+
+```{r}
+#Prediction and confusion matrix
+train.X = as.matrix(Lag2[train])
+test.X=as.matrix(Lag2[!train])
+train.Direction=Direction[train]
+set.seed(1)
+KNN.pred=knn(train.X, test.X, train.Direction, k=1)
+table(KNN.pred, Direction.Test)
+mean(KNN.pred!=Direction.Test)
+```
+
+(h) Repeat (d) using naive Bayes.
+
+```{r}
+library(e1071)
+```
+```{r}
+#Fitting of the Naive Bayes model
+NB=naiveBayes(Direction~Lag2, data=Weekly, subset=train)
+NB
+```
+```{r}
+#Prediction and confusion matrix
+NB.pred=predict(NB, Weekly.Test)
+table(NB.pred, Direction.Test)
+mean(NB.pred==Direction.Test)
+mean(NB.pred!=Direction.Test)
+```
+
+(i) Which of these methods appears to provide the best results on this data?
+
+<span style="color:blue">
+Best results are providen by logitic regression and LDA. Then, QDA and Naive Bayes. At last, KNN (K=1).
+</span>
+
+
+(j) Experiment with different combinations of predictors, including possible transformations and interactions, for each of the methods. Report the variables, method, and associated confusion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+
+<span style="color:blue">Since best results are providen with logistic regression and LDA. We perform LDA with the rest of the predictors separately.</span>
+```{r}
+#Separation of training and test data
+#train=(Year<2009)
+#Weekly.Test=Weekly[!train,]#datos con train false, ie. year>=2009
+#Direction.Test=Direction[!train]
+#LDA=lda(Direction~Lag2, data=Weekly, subset=train)
+#LDA.pred=predict(LDA, Weekly.Test)
+#names(LDA.pred)
+#LDA.Direction=LDA.pred$class
+#table(LDA.Direction, Direction.Test)
+#mean(LDA.Direction!=Direction.Test)
+for (i in 2:8){
+  Model=lda(Direction~Weekly[,i], data=Weekly, subset=train)
+  LDA.pred=predict(Model, Weekly.Test)
+  LDA.Direction=LDA.pred$class
+  #print(table(LDA.Direction, Direction.Test))
+  #print(mean(LDA.Direction!=Direction.Test))
+}
+
+```
+```{r}
+Model=lda(Direction~Lag2, data=Weekly, subset=train)
+LDA.pred=predict(Model, Weekly.Test)
+LDA.Direction=LDA.pred$class
+table(LDA.Direction, Direction.Test)
+mean(LDA.Direction!=Direction.Test)
+```
+
+<span style="color:blue"> Now, we calculate de correlation matrix of the predictors in order to perform some models with interactions.<span>
+
+```{r}
+cor(Weekly[-9])
+```
+
+
+<span style="color:blue">At last, we model KNN with different values for k in 1,...,100. We print only the best results, i.e., those that mean is greater than 0.6.
+
+```{r}
+train.X = as.matrix(Lag2[train])
+test.X=as.matrix(Lag2[!train])
+train.Direction=Direction[train]
+set.seed(1)
+for (i in 1:100){
+  KNN.pred=knn(train.X, test.X, train.Direction, k=i)
+  table(KNN.pred, Direction.Test)
+  if (mean(KNN.pred==Direction.Test)>=0.6){
+    print(i)
+    print(mean(KNN.pred==Direction.Test))
+  }
+}
+```
+
+<h1>Chapter 5 - Exercise 7</h1><a name='id2'></a>
+
+In Sections 5.3.2 and 5.3.3, we saw that the cv.glm() function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the glm() and predict.glm() functions, and a for loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the Weekly data set. Recall that in the context of classification problems, the LOOCV error is given in (5.4).
+
+(a) Fit a logistic regression model that predicts Direction using Lag1 and Lag2 .
+
+```{r}
+LRM<-glm(Direction~Lag1+Lag2, data=Weekly, family=binomial)
+summary(LRM)
+```
+
+
+(b) Fit a logistic regression model that predicts Direction using Lag1 and Lag2 using all but the first observation.
+
+```{r}
+LRMwo1<-glm(Direction~Lag1+Lag2, data=Weekly[-1,], family=binomial)
+summary(LRMwo1)
+```
+
+
+(c) Use the model from (b) to predict the direction of the first observation. You can do this by predicting that the first observation will go up if P ( Direction = "Up" | Lag1 , Lag2 ) > 0.5. Was this observation correctly classified?
+
+```{r}
+X1pred<-if(predict ( LRMwo1 , Weekly[1,] , type = "response")>0.5){"Up"}else{"Down"}
+X1pred==Weekly[1,]$Direction
+```
+
+
+(d) Write a for loop from i = 1 to i = n, where n is the number of observations in the data set, that performs each of the following steps:
+i. Fit a logistic regression model using all but the ith observation to predict Direction using Lag1 and Lag2.
+ii. Compute the posterior probability of the market moving up for the ith observation.
+iii. Use the posterior probability for the ith observation in order to predict whether or not the market moves up.
+iv. Determine whether or not an error was made in predicting the direction for the ith observation. If an error was made, then indicate this as a 1, and otherwise indicate it as a 0.
+
+
+```{r}
+n=dim(Weekly)[1]
+cv.error=rep(0,n)
+for (i in 1:n){
+  LRMwoi<-glm(Direction~Lag1+Lag2, data=Weekly[-i,], family=binomial)
+  Xipred<-if(predict ( LRMwoi , Weekly[i,] , type = "response")>0.5){"Up"}else{"Down"}
+  cv.error[i]<- if (Xipred!=Weekly[i,]$Direction){1}else{0}
+}
+
+```
+
+
+(e) Take the average of the n numbers obtained in (d)iv in order to obtain the LOOCV estimate for the test error. Comment on the results.
+
+```{r}
+mean(cv.error)
+```
+<span style="color:blue">The model without one element classifies wrongly more than 50% of the data.</span>

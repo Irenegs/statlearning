@@ -1,0 +1,38 @@
+---
+title: "Stack"
+author: "IreneGS"
+date: '2022-09-16'
+output: html_document
+---
+
+```{r}
+library(ISLR2)
+attach(Weekly)
+library(MASS)
+```
+```{r}
+#Separation of training and test data
+train <- (Year<2009)
+Weekly.Test=Weekly[!train,]
+Direction.Test=Direction[!train]
+LDA=lda(Direction~Lag2, data=Weekly, subset=train)
+LDA.pred=predict(LDA, Weekly.Test)
+LDA.Direction=LDA.pred$class
+
+LDA2=lda(Direction~Weekly[,3], data=Weekly, subset=train)
+LDA2.pred=predict(LDA2, Weekly.Test)
+LDA2.Direction=LDA2.pred$class
+
+```
+```{r}
+
+for (i in 2:8){
+  Model=lda(Direction~Weekly[,i], data=Weekly, subset=train)
+  LDA.pred=predict(Model, Weekly.Test)
+  LDA.Direction=LDA.pred$class
+  #print(table(LDA.Direction, Direction.Test))
+  #print(mean(LDA.Direction!=Direction.Test))
+}
+
+```
+

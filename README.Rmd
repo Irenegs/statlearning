@@ -1,0 +1,54 @@
+---
+title: "README"
+author: "IreneGS"
+date: '2022-09-08'
+output: html_document
+---
+
+This project contents the applied exercises of Introduction to Statistical Learning (2nd edition), by Gareth James, Daniela Witten, Trevor Hastie and Robert Tibshirani, published by Springer and that can be found in https://www.statlearning.com/
+
+The aim of this project is just to compile the applied exercises done during the study of this book. The exercises in this project are organised by data set and then by chapter. An index can be found at the end of this document.
+
+<h1>Methodology</h1>
+
+We are three people with a Bachelor in Mathematics. At the beginning of this project I worked as a math teacher in a high school and the other two people worked in marketing companies.
+
+We used to meet via Skype once a week (almost every week from November 2021 to June 2022). In each meeting we talked about what we have read and we commented the exercises for that week. Then we set what pages and exercises should be done for the next meeting. We used RStudio as IDE for R.
+
+By June 2022 we have read up to Chapter 6, but we did not cover the lab exercises for that chapter.
+
+This is a learning project,so there will certainly be some errors in our answers, so use your own critical judgment for confirmation.
+
+<h1>Exercises index</h1>
+
+WODSEX means without data set exercises.
+
+Chapter 1 includes no exercises.
+
+Chapter 2
+Exercise 8 College
+Exercise 9 Auto
+Exercise 10 Boston
+
+Chapter 3
+Exercise 8 Auto
+Exercise 9 Auto
+Exercise 10 Carseats
+Exercise 11 WODSEX
+Exercise 12 WODSEX
+Exercise 13 WODSEX
+Exercise 14 WODSEX
+Exercise 15 Boston
+
+Chapter 4
+Exercise 13 Weekly
+Exercise 14 Auto
+Exercise 15 WODSEX
+Exercise 16 Boston
+
+Chapter 5
+Exercise 5 Default
+Exercise 6 Default
+Exercise 7 Weekly
+Exercise 8 WODSEX
+Exercise 9 Boston

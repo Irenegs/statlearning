@@ -1,0 +1,403 @@
+---
+title: "Auto"
+output: html_notebook
+---
+
+**Index**   
+1. [Chapter 2 - Exercise 9](#id1)  
+2. [Chapter 3 - Exercise 8](#id2)  
+3. [Chapter 3 - Exercise 9](#id3)  
+4. [Chapter 4 - Exercise 14](#id4)
+
+<span style="color:green">
+We consider only complete observations:</span>
+
+```{r}
+Auto=read.csv('data/Auto.csv',header=TRUE, na.strings = '?')
+Auto=na.omit(Auto)
+```
+<span style="color:green">Visualize:</span>
+
+```{r}
+View(Auto)
+fix(Auto)
+```
+<span style="color:green">Dimension: rows x columns</span>
+
+```{r}
+dim(Auto)
+```
+
+<span style="color:green">List of variables and fix them.</span>
+
+```{r}
+
+names(Auto)
+
+attach(Auto)
+
+```
+
+
+<h1>Chapter 2 - Exercise 9</h1><a name='id1'></a>
+
+(a) Which of the predictors are quantitative, and which are qualitative?
+
+<span style="color:green">Dataset summary</span>
+```{r}
+summary(Auto)
+```
+
+<span style="color:blue">
+Quantitative: mpg, cylinders, displacement, horsepower, weight, acceleration, year, origin  
+Qualitative: name</span>
+
+
+
+(b) What is the range of each quantitative predictor? You can answer this using the range() function.
+```{r}
+for (i in 1:8){
+  print(paste(names(Auto[i]),range(Auto[i])[2]-range(Auto[i])[1]))
+}
+
+```
+
+
+(c) What is the mean and standard deviation of each quantitative predictor?
+
+
+<span style="color:blue">Variable, mean, standard deviation</span>
+```{r}
+for (i in 1:8){
+  print(paste(names(Auto[i]),' ',lapply(Auto[i],mean),lapply(Auto[i],sd)))
+}
+
+```
+
+
+
+(d) Now remove the 10th through 85th observations. What is the range, mean, and standard deviation of each predictor in the subset of the data that remains?
+
+
+```{r}
+Auto2=Auto[-c(10:85),]
+dim(Auto2)
+summary(Auto2)
+```
+
+
+(e) Using the full data set, investigate the predictors graphically, using scatterplots or other tools of your choice. Create some plots highlighting the relationships among the predictors. Comment on your findings.
+
+```{r}
+pairs(Auto)
+```
+<span style="color:blue">Positive relationships: (displacement, horsepower, weight,cylinders), mpg and year
+Negative relationship: prev.() and mpg, origin, acceleration</span>
+
+(f) Suppose that we wish to predict gas mileage ( mpg ) on the basis of the other variables. Do your plots suggest that any of the other variables might be useful in predicting mpg ? Justify your answer.
+
+<span style="color:blue">Displacement, horsepower and weight. Maybe origin.</span>
+
+
+<h1>Chapter 3 - Exercise 8</h1><a name='id2'></a>
+
+(a) Use the lm() function to perform a simple linear regression with mpg as the response and horsepower as the predictor. Use the summary() function to print the results. Comment on the output. For example:
+
+```{r}
+A=lm(mpg~horsepower, Auto)
+summary(A)
+```
+
+
+i. Is there a relationship between the predictor and the response?
+
+<span style="color:blue">Yes, because p-value of F-statistic is low.</span>
+
+ii. How strong is the relationship between the predictor and the response?
+
+<span style="color:blue">Yes, because p-value of predictor is low.</span>
+
+iii. Is the relationship between the predictor and the response positive or negative?
+
+<span style="color:blue">It is negative, since the coefficient is -0,157845.</span>
+
+iv. What is the predicted mpg associated with a horsepower of 98? What are the associated 95 % confidence and prediction intervals?
+
+<span style="color:blue">predicted mpg associated with a horsepower of 98: 39,93-0,15*98</span>
+
+```{r}
+predict (A,data.frame(horsepower=98),interval='confidence')
+predict (A,data.frame(horsepower=(c(98))),interval='prediction')
+```
+
+
+(b) Plot the response and the predictor. Use the abline() function to display the least squares regression line.
+
+```{r}
+plot(horsepower, mpg)
+abline(A,lwd=3,col='red')
+```
+
+
+(c) Use the plot() function to produce diagnostic plots of the least squares regression fit. Comment on any problems you see with the fit.
+
+```{r}
+par (mfrow = c(2, 2))#Splits the screen
+plot(A)
+```
+
+
+
+<h1>Chapter 3 - Exercise 9</h1><a name='id3'></a>
+
+(a) Produce a scatterplot matrix which includes all of the variables in the data set.
+
+```{r}
+pairs(Auto)
+```
+
+(b) Compute the matrix of correlations between the variables using the function cor() . You will need to exclude the name variable, which is qualitative.
+
+```{r}
+cor(Auto[-9])
+```
+<span style="color:blue">High correlation: cylinders and displacement (0.9508233), weight and displacement (0.9329944), displacement and horsepower (0.8972570), weight and horsepower (0.8645377), cylinders and horsepower (0.8429834), weight and mpg (-0.8322442), mpg and displacement (-0.8051269)</span>
+
+(c) Use the lm() function to perform a multiple linear regression with mpg as the response and all other variables except name as the predictors. Use the summary() function to print the results. Comment on the output. For instance:
+
+```{r}
+B=lm(mpg~cylinders+displacement+horsepower+weight+acceleration+year+origin)
+summary(B)
+```
+
+
+i. Is there a relationship between the predictors and the response?
+
+<span style="color:blue">Yes, because p-value of F-statistic is low.</span>
+
+ii. Which predictors appear to have a statistically significant relationship to the response?
+
+<span style="color:blue">year, weight and origin (lower p-values with t value far from 0)</span>
+
+iii. What does the coefficient for the year variable suggest?
+
+<span style="color:blue">Positive relationship between year and mpg. For an increment of a year, mpg grows 0.750773 units.</span>
+
+(d) Use the plot() function to produce diagnostic plots of the linear regression fit. Comment on any problems you see with the fit. Do the residual plots suggest any unusually large outliers? Does the leverage plot identify any observations with unusually high leverage?
+
+```{r}
+par (mfrow = c(2,2))
+plot(B)
+```
+
+
+<span style="color:blue">Residuals vs fitted values -> Outliers: 324, 325 and 321. It seems there is no linear relationship because there is no pattern in residuals.</span>
+
+<span style="color:blue">In sqrt(|st res|) vs fitted values we see the same outliers.</span>
+
+<span style="color:blue">High -leverage points:  14, also 389 as outlier.</span>
+
+
+(e) Use the * and : symbols to fit linear regression models with interaction effects. Do any interactions appear to be statistically significant?
+
+<span style="color:blue">We leave out the non-significant variables:</span>
+
+
+<span style="color:blue">
+Variable,  Estimate Std. Error, t value, Pr(>|t|)    
+cylinders     -0.493376   0.323282  -1.526  0.12780    
+horsepower    -0.016951   0.013787  -1.230  0.21963    
+acceleration   0.080576   0.098845   0.815  0.41548    </span>
+
+
+```{r}
+C=lm(mpg~+displacement+weight+year+origin)
+summary(C)
+```
+
+<span style="color:blue">We also take out displacement.</span>
+
+```{r}
+D=lm(mpg~weight+year+origin)
+summary(D)
+```
+
+<span style="color:blue">Correlation between them were low. But correlation between displacement and weight was quite high (0.9329944).</span>
+
+<span style="color:blue">Model with weight*displacement interaction:</span>
+
+```{r}
+E=lm(mpg~displacement*weight+year+origin)
+summary(E)
+```
+<span style="color:blue">Result: origin seems less important and displacement seems more important than before. However, RSS grows a little and adjusted R-squared decreases when we take it out:</span>
+
+```{r}
+F=lm(mpg~displacement*weight+year)
+summary(F)
+```
+
+
+(f) Try a few different transformations of the variables, such as log(X), √X, X^2 . Comment on your findings.
+
+<span style="color:blue">We take model from exercise 8 (linear regression with horsepower)</span>
+
+```{r}
+summary(A)
+```
+
+<span style="color:blue">We try with x²:</span>
+
+```{r}
+G=lm(mpg~horsepower+I(horsepower^2))
+summary(G)
+par (mfrow = c(2,2))
+plot(G)
+```
+
+<span style="color:blue">Now we do not observe a bell form in residuals. Comparison:</span>
+
+```{r}
+anova(A,G)
+```
+
+<span style="color:blue">Result interpretation (Page 116) 
+The anova() function performs a hypothesis test comparing the two models. The null hypothesis is that the two models
+fit the data equally well, and the alternative hypothesis is that the full model is superior. Here the F -statistic is 101 and the associated p-value is virtually zero. This provides very clear evidence that the model containing
+the predictors horsepower and horsepower² is far superior to the model that only contains the predictor hosepower. This is not surprising, since earlier we saw evidence for non-linearity in the relationship between mpg and horsepower.</span>
+
+
+<span style="color:blue">We use poly until 5th power for the same model:</span>
+
+```{r}
+H=lm(mpg~poly(horsepower,5))
+summary(H)
+```
+
+
+<span style="color:blue">We observe that F-statistics decreases and that powers of horsepower are significant until cuadratic (previous model).</span>
+
+<span style="color:blue">If we consider a model with powers 1, 2 and 5, we see than p-value of horsepower⁵ increases, but the RSS, R² and F-statisctic do not improve so much with respect to the cuadratic model:</span>
+
+```{r}
+I=lm(mpg~horsepower+I(horsepower^2)+I(horsepower^5))
+summary(I)
+```
+<h1>Chapter 4 - Exercise 14</h1><a name='id4'></a>
+
+In this problem, you will develop a model to predict whether a given car gets high or low gas mileage based on the Auto data set.
+(a) Create a binary variable, mpg01 , that contains a 1 if mpg contains a value above its median, and a 0 if mpg contains a value below its median. You can compute the median using the median()
+function. Note you may find it helpful to use the data.frame() function to create a single data set containing both mpg01 and the other Auto variables.
+
+```{r}
+M=median(mpg)
+mpg01 <- rep(1, length(mpg))
+mpg01[mpg<median(mpg)] <- 0
+detach(Auto)
+DFmpg01 <- data.frame(mpg01, Auto[, -1])
+attach(DFmpg01)
+```
+
+
+(b) Explore the data graphically in order to investigate the association between mpg01 and the other features. Which of the other features seem most likely to be useful in predicting mpg01? Scatterplots and boxplots may be useful tools to answer this question. Describe your findings.
+
+```{r}
+par (mfrow = c(2, 4))
+for (i in 2:9){
+  plot(mpg01,DFmpg01[,i], ylab=names(Auto[i]))
+}
+```
+
+
+
+```{r}
+par (mfrow = c(2, 4))
+for (i in 2:8){
+  plot(as.factor(mpg01),DFmpg01[,i], xlab="mpg01", ylab=names(Auto[i]))
+}
+```
+<span style="color:blue">
+</span>
+
+
+(c) Split the data into a training set and a test set.
+
+```{r}
+train=(year<80)
+DFmpg01.Test=DFmpg01[!train,]#data with train = false, ie. year>=80
+MPG01.Test=mpg01[!train]
+```
+
+
+(d) Perform LDA on the training data in order to predict mpg01 using the variables that seemed most associated with mpg01 in (b). What is the test error of the model obtained?
+
+```{r}
+library(MASS)
+#Fitting of the LDA model
+lda.fit <- lda(mpg01 ~ cylinders+displacement+horsepower+weight, data=DFmpg01, subset=train)
+lda.pred <- predict(lda.fit, DFmpg01.Test)
+lda.class <- lda.pred$class
+
+table(lda.class, MPG01.Test)
+mean(lda.class!=MPG01.Test)
+```
+
+
+
+(e) Perform QDA on the training data in order to predict mpg01 using the variables that seemed most associated with mpg01 in (b). What is the test error of the model obtained?
+```{r}
+QDA.Model=qda(mpg01~cylinders, data=DFmpg01, subset=train)
+QDA.pred=predict(QDA.Model, DFmpg01.Test)
+names(QDA.pred)
+QDA.MPG01=QDA.pred$class
+table(QDA.MPG01, MPG01.Test)
+mean(QDA.MPG01!=MPG01.Test)
+```
+
+
+(f) Perform logistic regression on the training data in order to predict mpg01 using the variables that seemed most associated with mpg01 in (b). What is the test error of the model obtained?
+
+```{r}
+LR=glm(mpg01~cylinders, data=DFmpg01, family=binomial,subset=train)
+summary(LR)
+LR.Prob=predict(LR,DFmpg01.Test, type='response')
+LR.pred =rep (0, length(MPG01.Test))
+LR.pred[LR.Prob>.5] = 1
+table(LR.pred, MPG01.Test)
+mean(LR.pred!=MPG01.Test)
+```
+
+
+(g) Perform naive Bayes on the training data in order to predict mpg01 using the variables that seemed most associated with mpg01 in (b). What is the test error of the model obtained?
+
+
+```{r}
+library(e1071)
+```
+```{r}
+#Fitting of the Naive Bayes model
+NB=naiveBayes(mpg01~cylinders, data=DFmpg01, subset=train)
+#Prediction and confusion matrix
+NB.pred=predict(NB, DFmpg01.Test)
+table(NB.pred, MPG01.Test)
+mean(NB.pred!=MPG01.Test)
+```
+
+(h) Perform KNN on the training data, with several values of K, in order to predict mpg01 . Use only the variables that seemed most associated with mpg01 in (b). What test errors do you obtain? Which value of K seems to perform the best on this data set?
+
+
+```{r}
+library(class)
+train.X <- cbind(cylinders, displacement, horsepower, weight)[train,]
+test.X <- cbind(cylinders, displacement, horsepower, weight)[!train,]
+train.DFmpg01 <- mpg01[train]
+set.seed(1)
+for (i in 1:100){
+  KNN.pred=knn(train.X, test.X, train.DFmpg01, k=i)
+  table(KNN.pred, MPG01.Test)
+  if (mean(KNN.pred==MPG01.Test)>=0.82){
+    print(i)
+    print(mean(KNN.pred==MPG01.Test))
+  }
+}
+```

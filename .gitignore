@@ -1,0 +1,8 @@
+data/*
+inst*
+man*
+*.pdf
+.R*
+NAMESPACE
+*.html
+
