@@ -4,5 +4,4 @@ man*
 *.pdf
 .R*
 NAMESPACE
-*.html
 
